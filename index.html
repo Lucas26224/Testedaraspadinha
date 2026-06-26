@@ -6,7 +6,7 @@
     <title>Chá Revelação: Quem Tá Chegando?</title>
     <style>
         body {
-            font-family: 'Times New Roman', Times, serif; /* Usando uma fonte com serifa para combinar */
+            font-family: 'Times New Roman', Times, serif;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -20,8 +20,8 @@
             max-width: 400px; /* Largura máxima para celular */
             height: 80vh;
             max-height: 700px; /* Altura máxima */
-            /* IMPORTANTE: Salve a imagem do convite como 'background.png' na mesma pasta */
-            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABLAAAAVkCAYAAAC6476bAAAACXBIWXMAAC4jAAAuIwF4pT92AAAAA...'); /* Usei uma base64 reduzida aqui por brevidade. No seu arquivo, substitua por url('background.png') e garanta que o arquivo esteja lá. */
+            /* IMPORTANTE: Esta é a sua imagem inteira incorporada como base64 */
+            background-image: url('data:image/jpeg;base64,<!-- [Sua imagem inteira de convite convertida em base64 aqui] -->'); 
             background-size: cover;
             background-position: center;
             border-radius: 20px;
@@ -33,38 +33,10 @@
             align-items: center;
         }
 
-        /* Sobrepor elementos invisíveis or recriar os textos para interação */
-        .header-text {
-            color: #795548; /* Marrom suave */
-            font-size: 2.2em;
-            margin-top: 60px;
-            text-align: center;
-        }
+        /* Os textos e os macacões já estão na imagem de fundo. */
+        /* Simplificamos os estilos anteriores. */
 
-        .jumpsuits-container {
-            display: flex;
-            justify-content: space-around;
-            width: 80%;
-            margin-top: 15px;
-        }
-
-        .names-container {
-            display: flex;
-            justify-content: space-around;
-            width: 80%;
-            margin-top: 5px;
-            color: #795548;
-            font-size: 1.3em;
-        }
-
-        .scratch-label {
-            color: #795548;
-            font-size: 1.1em;
-            margin-top: 15px;
-            margin-bottom: 5px;
-        }
-
-        /* A grade de raspadinha centralizada abaixo de 'Raspe aqui!' */
+        /* A grade de raspadinha centralizada abaixo do texto 'Raspe aqui!' da imagem */
         .scratch-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -72,7 +44,7 @@
             width: 75%;
             max-width: 280px;
             position: absolute;
-            bottom: calc(20px); /* Ajustado para ficar na área em branco */
+            bottom: calc(20px); /* Ajustado para ficar na área em branco da imagem */
             left: 50%;
             transform: translateX(-50%);
         }
@@ -122,15 +94,7 @@
 <body>
 
     <div class="screen-container">
-        <h1 class="header-text">Quem tá chegando?</h1>
-        
-        <div class="names-container">
-            <div>josé Miguel</div>
-            <div>Maria Teresa</div>
-        </div>
-        
-        <div class="scratch-label">Raspe aqui!</div>
-
+        <!-- Apenas a grade de raspadinha é um filho direto -->
         <div class="scratch-grid" id="grid"></div>
     </div>
 
@@ -164,7 +128,7 @@
                 canvas.width = size;
                 canvas.height = size;
 
-                // Desenha a cobertura prateada aquarela
+                // Desenha a cobertura prateada aquarela suave
                 ctx.fillStyle = '#b0bec5'; /* Um cinza azulado mais suave */
                 ctx.fillRect(0, 0, size, size);
                 
