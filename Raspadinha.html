@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Raspadinha do Bebê</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+        p {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            gap: 15px;
+        }
+        .scratch-container {
+            width: 100px;
+            height: 100px;
+            position: relative;
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            background-color: white;
+        }
+        .result-text {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            text-align: center;
+            padding: 5px;
+            box-sizing: border-box;
+            user-select: none;
+        }
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 2;
+            cursor: pointer;
+            touch-action: none; /* Previne o zoom/scroll do navegador ao raspar */
+        }
+        /* Cores dos nomes */
+        .menino { color: #0d6efd; }
+        .menina { color: #d63384; }
+    </style>
+</head>
+<body>
+
+    <h1>É Menino ou Menina?</h1>
+    <p>Raspe um círculo por vez. O nome que aparecer mais vezes, ganha!</p>
+
+    <div class="grid" id="grid"></div>
+
+    <script>
+        // CONFIGURAÇÃO DO RESULTADO: 
+        // Coloque 5 do vencedor e 4 do outro. 
+        // No exemplo abaixo, JOSÉ MIGUEL ganha (5 a 4).
+        const nomes = [
+            "José Miguel", "José Miguel", "José Miguel", "José Miguel", "José Miguel",
+            "Maria Tereza", "Maria Tereza", "Maria Tereza", "Maria Tereza"
+        ];
+
+        // Embaralha as posições aleatoriamente toda vez que a página carrega
+        nomes.sort(() => Math.random() - 0.5);
+
+        const grid = document.getElementById('grid');
+        
+        // A VARIÁVEL MÁGICA: Controla qual círculo está sendo raspado no momento
+        let canvasAtivo = null; 
+
+        nomes.forEach((nome) => {
+            const container = document.createElement('div');
+            container.className = 'scratch-container';
+
+            const textDiv = document.createElement('div');
+            textDiv.className = `result-text ${nome === 'José Miguel' ? 'menino' : 'menina'}`;
+            textDiv.innerText = nome;
+
+            const canvas = document.createElement('canvas');
+            canvas.width = 100;
+            canvas.height = 100;
+            const ctx = canvas.getContext('2d');
+
+            // Desenha a cobertura prateada da raspadinha
+            ctx.fillStyle = '#c0c0c0';
+            ctx.fillRect(0, 0, 100, 100);
+            
+            // Adiciona uma textura leve
+            ctx.fillStyle = '#a9a9a9';
+            for(let i = 0; i < 40; i++) {
+                ctx.beginPath();
+                ctx.arc(Math.random() * 100, Math.random() * 100, Math.random() * 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            let isDrawing = false;
+
+            // Pega a posição do mouse ou do toque do dedo
+            const getPos = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return { x: clientX - rect.left, y: clientY - rect.top };
+            };
+
+            const iniciarRaspagem = (e) => {
+                // REGRA DE OURO: Se já tem um círculo sendo raspado e não é este, bloqueia!
+                if (canvasAtivo !== null && canvasAtivo !== canvas) return;
+                
+                canvasAtivo = canvas; // Trava o sistema neste círculo
+                isDrawing = true;
+                raspar(e);
+            };
+
+            const pararRaspagem = () => {
+                isDrawing = false;
+                // Quando tira o dedo da tela, libera o sistema para raspar outro círculo
+                if (canvasAtivo === canvas) {
+                    canvasAtivo = null; 
+                }
+            };
+
+            const raspar = (e) => {
+                if (!isDrawing || canvasAtivo !== canvas) return;
+                e.preventDefault(); // Evita que a tela role no celular
+                
+                const pos = getPos(e);
+                ctx.globalCompositeOperation = 'destination-out'; // "Apaga" a camada prateada
+                ctx.beginPath();
+                ctx.arc(pos.x, pos.y, 18, 0, Math.PI * 2); // Tamanho da borracha (18px)
+                ctx.fill();
+            };
+
+            // Eventos para Mouse (Computador)
+            canvas.addEventListener('mousedown', iniciarRaspagem);
+            canvas.addEventListener('mousemove', raspar);
+            window.addEventListener('mouseup', pararRaspagem);
+
+            // Eventos para Touch (Celular)
+            canvas.addEventListener('touchstart', iniciarRaspagem, {passive: false});
+            canvas.addEventListener('touchmove', raspar, {passive: false});
+            window.addEventListener('touchend', pararRaspagem);
+
+            // Monta tudo na tela
+            container.appendChild(textDiv);
+            container.appendChild(canvas);
+            grid.appendChild(container);
+        });
+    </script>
+</body>
+</html>
