@@ -3,41 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Raspadinha do Bebê</title>
+    <title>Chá Revelação: Quem Tá Chegando?</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Times New Roman', Times, serif; /* Usando uma fonte com serifa para combinar */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f7f3ed; /* Cor de fundo suave */
+        }
+
+        .screen-container {
+            width: 90vw;
+            max-width: 400px; /* Largura máxima para celular */
+            height: 80vh;
+            max-height: 700px; /* Altura máxima */
+            /* IMPORTANTE: Salve a imagem do convite como 'background.png' na mesma pasta */
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABLAAAAVkCAYAAAC6476bAAAACXBIWXMAAC4jAAAuIwF4pT92AAAAA...'); /* Usei uma base64 reduzida aqui por brevidade. No seu arquivo, substitua por url('background.png') e garanta que o arquivo esteja lá. */
+            background-size: cover;
+            background-position: center;
+            border-radius: 20px;
+            position: relative;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            overflow: hidden;
             display: flex;
             flex-direction: column;
             align-items: center;
-            background-color: #f8f9fa;
-            margin: 0;
-            padding: 20px;
+        }
+
+        /* Sobrepor elementos invisíveis or recriar os textos para interação */
+        .header-text {
+            color: #795548; /* Marrom suave */
+            font-size: 2.2em;
+            margin-top: 60px;
             text-align: center;
         }
-        h1 {
-            color: #333;
+
+        .jumpsuits-container {
+            display: flex;
+            justify-content: space-around;
+            width: 80%;
+            margin-top: 15px;
+        }
+
+        .names-container {
+            display: flex;
+            justify-content: space-around;
+            width: 80%;
+            margin-top: 5px;
+            color: #795548;
+            font-size: 1.3em;
+        }
+
+        .scratch-label {
+            color: #795548;
+            font-size: 1.1em;
+            margin-top: 15px;
             margin-bottom: 5px;
         }
-        p {
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 14px;
-        }
-        .grid {
+
+        /* A grade de raspadinha centralizada abaixo de 'Raspe aqui!' */
+        .scratch-grid {
             display: grid;
-            grid-template-columns: repeat(3, 100px);
-            gap: 15px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            width: 75%;
+            max-width: 280px;
+            position: absolute;
+            bottom: calc(20px); /* Ajustado para ficar na área em branco */
+            left: 50%;
+            transform: translateX(-50%);
         }
+
         .scratch-container {
-            width: 100px;
-            height: 100px;
+            aspect-ratio: 1; /* Círculos perfeitos */
             position: relative;
             border-radius: 50%;
             overflow: hidden;
             box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-            background-color: white;
+            background-color: #f0eae4; /* Cor de fundo suave quando raspado */
         }
+
         .result-text {
             position: absolute;
             top: 0;
@@ -48,47 +96,55 @@
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 16px;
+            font-size: 0.8em;
             text-align: center;
             padding: 5px;
             box-sizing: border-box;
             user-select: none;
+            font-family: 'Times New Roman', Times, serif;
         }
+
         canvas {
             position: absolute;
             top: 0;
             left: 0;
             z-index: 2;
             cursor: pointer;
-            touch-action: none; /* Previne o zoom/scroll do navegador ao raspar */
+            touch-action: none;
         }
-        /* Cores dos nomes */
-        .menino { color: #0d6efd; }
-        .menina { color: #d63384; }
+
+        /* Cores dos nomes - Usando tons aquarela suaves */
+        .menino { color: #64b5f6; }
+        .menina { color: #f48fb1; }
+
     </style>
 </head>
 <body>
 
-    <h1>É Menino ou Menina?</h1>
-    <p>Raspe um círculo por vez. O nome que aparecer mais vezes, ganha!</p>
+    <div class="screen-container">
+        <h1 class="header-text">Quem tá chegando?</h1>
+        
+        <div class="names-container">
+            <div>josé Miguel</div>
+            <div>Maria Teresa</div>
+        </div>
+        
+        <div class="scratch-label">Raspe aqui!</div>
 
-    <div class="grid" id="grid"></div>
+        <div class="scratch-grid" id="grid"></div>
+    </div>
 
     <script>
-        // CONFIGURAÇÃO DO RESULTADO: 
-        // Coloque 5 do vencedor e 4 do outro. 
-        // No exemplo abaixo, JOSÉ MIGUEL ganha (5 a 4).
+        // CONFIGURAÇÃO DO RESULTADO (Exemplo: Menina vence por 5x4)
         const nomes = [
-            "José Miguel", "José Miguel", "José Miguel", "José Miguel", "José Miguel",
-            "Maria Tereza", "Maria Tereza", "Maria Tereza", "Maria Tereza"
+            "Maria Teresa", "José Miguel", "Maria Teresa", "José Miguel", "Maria Teresa",
+            "José Miguel", "Maria Teresa", "José Miguel", "Maria Teresa"
         ];
 
-        // Embaralha as posições aleatoriamente toda vez que a página carrega
+        // Embaralha as posições aleatoriamente
         nomes.sort(() => Math.random() - 0.5);
 
         const grid = document.getElementById('grid');
-        
-        // A VARIÁVEL MÁGICA: Controla qual círculo está sendo raspado no momento
         let canvasAtivo = null; 
 
         nomes.forEach((nome) => {
@@ -100,25 +156,33 @@
             textDiv.innerText = nome;
 
             const canvas = document.createElement('canvas');
-            canvas.width = 100;
-            canvas.height = 100;
             const ctx = canvas.getContext('2d');
 
-            // Desenha a cobertura prateada da raspadinha
-            ctx.fillStyle = '#c0c0c0';
-            ctx.fillRect(0, 0, 100, 100);
+            // Ajustar o canvas ao tamanho do contêiner
+            const resizeCanvas = () => {
+                const size = container.offsetWidth;
+                canvas.width = size;
+                canvas.height = size;
+
+                // Desenha a cobertura prateada aquarela
+                ctx.fillStyle = '#b0bec5'; /* Um cinza azulado mais suave */
+                ctx.fillRect(0, 0, size, size);
+                
+                // Adiciona textura aquarela granulada suave
+                ctx.fillStyle = '#a1887f'; /* Marrom aquarela suave */
+                for(let i = 0; i < 30; i++) {
+                    ctx.beginPath();
+                    ctx.arc(Math.random() * size, Math.random() * size, Math.random() * (size * 0.04), 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            };
             
-            // Adiciona uma textura leve
-            ctx.fillStyle = '#a9a9a9';
-            for(let i = 0; i < 40; i++) {
-                ctx.beginPath();
-                ctx.arc(Math.random() * 100, Math.random() * 100, Math.random() * 3, 0, Math.PI * 2);
-                ctx.fill();
-            }
+            // Chamar inicialmente e quando a janela redimensionar
+            window.addEventListener('load', resizeCanvas);
+            window.addEventListener('resize', resizeCanvas);
 
             let isDrawing = false;
 
-            // Pega a posição do mouse ou do toque do dedo
             const getPos = (e) => {
                 const rect = canvas.getBoundingClientRect();
                 const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -127,17 +191,14 @@
             };
 
             const iniciarRaspagem = (e) => {
-                // REGRA DE OURO: Se já tem um círculo sendo raspado e não é este, bloqueia!
                 if (canvasAtivo !== null && canvasAtivo !== canvas) return;
-                
-                canvasAtivo = canvas; // Trava o sistema neste círculo
+                canvasAtivo = canvas;
                 isDrawing = true;
                 raspar(e);
             };
 
             const pararRaspagem = () => {
                 isDrawing = false;
-                // Quando tira o dedo da tela, libera o sistema para raspar outro círculo
                 if (canvasAtivo === canvas) {
                     canvasAtivo = null; 
                 }
@@ -148,9 +209,10 @@
                 e.preventDefault(); // Evita que a tela role no celular
                 
                 const pos = getPos(e);
+                const size = canvas.width;
                 ctx.globalCompositeOperation = 'destination-out'; // "Apaga" a camada prateada
                 ctx.beginPath();
-                ctx.arc(pos.x, pos.y, 18, 0, Math.PI * 2); // Tamanho da borracha (18px)
+                ctx.arc(pos.x, pos.y, size * 0.18, 0, Math.PI * 2); /* Borracha proporcional */
                 ctx.fill();
             };
 
