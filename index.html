@@ -16,28 +16,29 @@
         }
 
         .screen-container {
-            width: 100vw;
-            max-width: 450px;
-            height: 100vh;
-            max-height: 850px;
-            /* AQUI ESTÁ A CORREÇÃO: O código puxa o arquivo que você já subiu! */
-            background-image: url('./background.jpeg?v=1'); 
-            background-size: cover;
+            width: 95vw; /* Aumenta a largura da imagem no celular */
+            max-width: 500px;
+            height: 92vh; /* Aumenta a altura para preencher mais a tela */
+            max-height: 900px;
+            background-image: url('./background.jpeg?v=2'); /* O ?v=2 dribla o cache */
+            background-size: 100% 100%; /* Força a imagem a preencher todo o quadro sem cortar */
             background-position: center;
+            background-repeat: no-repeat;
             position: relative;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
             overflow: hidden;
         }
 
-        /* A grade centralizada na parte inferior */
+        /* A grade posicionada no local correto */
         .scratch-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 12px;
-            width: 80%;
-            max-width: 280px;
+            width: 65%; /* Tamanho proporcional para caber abaixo do texto */
+            max-width: 250px;
             position: absolute;
-            bottom: 10%; /* Ficará bem na área livre abaixo de "Raspe aqui!" */
+            bottom: 4%; /* A mágica: empurra as bolinhas lá pro fundo, abaixo do Raspe aqui! */
             left: 50%;
             transform: translateX(-50%);
         }
@@ -90,7 +91,7 @@
     </div>
 
     <script>
-        // CONFIGURAÇÃO DO RESULTADO: 5 ganham, 4 perdem
+        // CONFIGURAÇÃO DO RESULTADO: Altere amanhã quando descobrir! (5 ganham, 4 perdem)
         const nomes = [
             "Maria Teresa", "José Miguel", "Maria Teresa", "José Miguel", "Maria Teresa",
             "José Miguel", "Maria Teresa", "José Miguel", "Maria Teresa"
