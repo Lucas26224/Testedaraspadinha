@@ -16,12 +16,12 @@
         }
 
         .screen-container {
-            width: 95vw; /* Aumenta a largura da imagem no celular */
+            width: 95vw;
             max-width: 500px;
-            height: 92vh; /* Aumenta a altura para preencher mais a tela */
+            height: 92vh;
             max-height: 900px;
-            background-image: url('./background.jpeg?v=2'); /* O ?v=2 dribla o cache */
-            background-size: 100% 100%; /* Força a imagem a preencher todo o quadro sem cortar */
+            background-image: url('./background.jpeg?v=3'); /* O v=3 força o celular a baixar a nova versão */
+            background-size: 100% 100%;
             background-position: center;
             background-repeat: no-repeat;
             position: relative;
@@ -30,15 +30,35 @@
             overflow: hidden;
         }
 
-        /* A grade posicionada no local correto */
+        /* ----- NOVO: A Placa de Resultado Final ----- */
+        #banner-resultado {
+            position: absolute;
+            top: 5%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            width: 85%;
+            background-color: rgba(255, 255, 255, 0.95); /* Fundo branco levemente transparente */
+            padding: 20px 10px;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 1.8em; /* Letra razoavelmente grande */
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.25);
+            opacity: 0; /* Começa invisível */
+            pointer-events: none;
+            transition: all 0.8s cubic-bezier(0.25, 0.8, 0.25, 1); /* Animação suave de descida */
+            z-index: 10;
+        }
+
+        /* O posicionamento da grade de raspadinhas */
         .scratch-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 12px;
-            width: 65%; /* Tamanho proporcional para caber abaixo do texto */
+            width: 65%;
             max-width: 250px;
             position: absolute;
-            bottom: 4%; /* A mágica: empurra as bolinhas lá pro fundo, abaixo do Raspe aqui! */
+            bottom: 4%;
             left: 50%;
             transform: translateX(-50%);
         }
@@ -87,20 +107,38 @@
 <body>
 
     <div class="screen-container">
+        <!-- Div que vai exibir a mensagem no topo -->
+        <div id="banner-resultado"></div>
+        
         <div class="scratch-grid" id="grid"></div>
     </div>
 
     <script>
-        // CONFIGURAÇÃO DO RESULTADO: Altere amanhã quando descobrir! (5 ganham, 4 perdem)
+        // CONFIGURAÇÃO DO RESULTADO (Mude amanhã!)
         const nomes = [
             "Maria Teresa", "José Miguel", "Maria Teresa", "José Miguel", "Maria Teresa",
             "José Miguel", "Maria Teresa", "José Miguel", "Maria Teresa"
         ];
 
+        // LÓGICA DO BANNER FINAL
+        let countMenino = nomes.filter(n => n === "José Miguel").length;
+        let countMenina = nomes.filter(n => n === "Maria Teresa").length;
+        
+        const banner = document.getElementById('banner-resultado');
+        // O sistema decide o texto do banner automaticamente baseado nos nomes acima
+        if (countMenino > countMenina) {
+            banner.innerHTML = "É menino!<br>José Miguel vem aí!";
+            banner.style.color = "#1976d2"; // Azul mais forte para o destaque
+        } else {
+            banner.innerHTML = "É menina!<br>Maria Teresa vem aí!";
+            banner.style.color = "#c2185b"; // Rosa mais forte para o destaque
+        }
+
         nomes.sort(() => Math.random() - 0.5);
 
         const grid = document.getElementById('grid');
         let canvasAtivo = null; 
+        const todasTelas = []; // Guarda as telas para verificar se foram raspadas
 
         nomes.forEach((nome) => {
             const container = document.createElement('div');
@@ -112,6 +150,7 @@
 
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
+            todasTelas.push(canvas);
 
             const resizeCanvas = () => {
                 const size = container.offsetWidth;
@@ -133,7 +172,7 @@
             
             window.addEventListener('load', resizeCanvas);
             window.addEventListener('resize', resizeCanvas);
-            setTimeout(resizeCanvas, 50); // Garante a renderização inicial
+            setTimeout(resizeCanvas, 50);
 
             let isDrawing = false;
 
@@ -156,6 +195,7 @@
                 if (canvasAtivo === canvas) {
                     canvasAtivo = null; 
                 }
+                setTimeout(verificarFimDeJogo, 100);
             };
 
             const raspar = (e) => {
@@ -182,6 +222,36 @@
             container.appendChild(canvas);
             grid.appendChild(container);
         });
+
+        // Função que verifica se já rasparam o suficiente para mostrar a placa
+        let jogoFinalizado = false;
+        function verificarFimDeJogo() {
+            if (jogoFinalizado) return;
+            let circulosRaspados = 0;
+            
+            todasTelas.forEach(c => {
+                const ctx = c.getContext('2d');
+                const imgData = ctx.getImageData(0, 0, c.width, c.height);
+                const pixels = imgData.data;
+                let transparentes = 0;
+                
+                for (let i = 3; i < pixels.length; i += 16) { 
+                    if (pixels[i] < 50) transparentes++;
+                }
+                
+                const totalChecados = Math.floor(pixels.length / 16);
+                if (transparentes / totalChecados > 0.35) { 
+                    circulosRaspados++;
+                }
+            });
+
+            // Quando 8 dos 9 círculos são raspados, a mágica acontece
+            if (circulosRaspados >= 8) {
+                jogoFinalizado = true;
+                banner.style.opacity = '1';
+                banner.style.transform = 'translateX(-50%) translateY(0)';
+            }
+        }
     </script>
 </body>
 </html>
